@@ -9,9 +9,9 @@ const Footer = (props) => {
                 <div className="col-4 offset-1 col-sm-2">
                     <h5>Links</h5>
                     <ul className="list-unstyled">
-                        <li><Link to="/home" href="#">Home</Link></li>
-                        <li><Link to ="/aboutus">About  Us</Link></li>
-                        <li><Link to ="/menu">Menu</Link></li>
+                        <li><Link to="/home" href="#">Haris</Link></li>
+                        <li><Link to ="/aboutus">Loru</Link></li>
+                        <li><Link to ="/menu">Hai</Link></li>
                         <li><Link to="/contactus">Contact Us</Link></li>
                     </ul>
                 </div>
