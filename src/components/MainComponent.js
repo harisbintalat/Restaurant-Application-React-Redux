@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Home from './HomeComponent';
+import About from './AboutComponent';
 import Menu from './MenuComponent'
 import Contact from './ContactComponent';
 import DishDetail from './DishdetailComponent';
@@ -39,19 +40,20 @@ import {Switch, Route, Redirect} from 'react-router-dom';
         }
         const DishWithId = ({match}) => {
             return(
-              <DishDetail dish={this.state.dishes.filter((dish) => dish.id === parseInt(match.params.dishId,10))[0]} 
-            comments={this.state.comments.filter((comment) => comment.dishId === parseInt(match.params.dishId,10))} />
+              <DishDetail dish={this.state.dishes.filter((dish) => dish.id === parseInt(match.params.parameter,10))[0]} 
+            comments={this.state.comments.filter((comment) => comment.dishId === parseInt(match.params.parameter,10))} />
             );
         }
 
         return (
           <div>
-            <Header name="Restornate de Confusion" />
+             <Header data-testid="check-1" name="Restornate de Confusion" /> 
 
             <Switch>
               <Route path="/home" component={HomePage} />
+              <Route exact path="/aboutus" component={()=> <About leader={this.state.leaders} />} />
               <Route exact path="/menu" component={()=> <Menu dishes={this.state.dishes} />} />
-              <Route path="/Menu/:dishId" component={DishWithId} />
+              <Route path="/Menu/:parameter" component={DishWithId} />
               <Route exact path="/contactus" component={Contact} />
               <Redirect to="/home" />
             </Switch>
