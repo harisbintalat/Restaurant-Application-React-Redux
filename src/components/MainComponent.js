@@ -4,67 +4,100 @@ import About from './AboutComponent';
 import Menu from './MenuComponent'
 import Contact from './ContactComponent';
 import DishDetail from './DishdetailComponent';
-import Header  from './Headercomponent';
+import Header from './Headercomponent';
 import Footer from './FooterComponent';
-import { DISHES } from '../shared/dishes';
-import { COMMENTS } from '../shared/comments';
-import { LEADERS } from '../shared/leaders';
-import { PROMOTIONS } from '../shared/promotions';
-import {Switch, Route, Redirect} from 'react-router-dom';
+import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { postComment, fetchDishes, fetchPromos, fetchComments, fetchleaders, postContact } from '../redux/ActionCreaters';
+import { actions } from 'react-redux-form';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
+const mapStateToProps = state => {
+  return {
+    dishes: state.dishes,
+    comments: state.comments,
+    promotions: state.promotions,
+    leaders: state.leaders
+  }
+}
 
-  class Main extends Component {
+const mapDispatchToProps = dispatch => ({
 
-    constructor(props){
-      super(props);
-      this.state={
-        dishes: DISHES,
-        comments: COMMENTS,
-        promotions: PROMOTIONS,
-        leaders: LEADERS
-        // selectedDish: null
-      };
-    }
-    onDishSelect(dishId) {
-      this.setState({selectedDish:dishId});
-    }
-      render() {
-        
-        const HomePage = () => {
-          return(
-            <Home dish={this.state.dishes.filter((dish)=>dish.featured)[0]}
-            promotion={this.state.promotions.filter((promo)=>promo.featured)[0]}
-            leader={this.state.leaders.filter((leader)=>leader.featured)[0]}
-          />
-          );
-        }
-        const DishWithId = ({match}) => {
-            return(
-              <DishDetail dish={this.state.dishes.filter((dish) => dish.id === parseInt(match.params.parameter,10))[0]} 
-            comments={this.state.comments.filter((comment) => comment.dishId === parseInt(match.params.parameter,10))} />
-            );
-        }
+  postComment: (dishId, rating, author, comment) => dispatch(postComment(dishId, rating, author, comment)),
+  fetchDishes: () => { dispatch(fetchDishes()) },
+  resetFeedbackForm: () => { dispatch(actions.reset('feedback')) },
+  fetchComments: () => dispatch(fetchComments()),
+  fetchPromos: () => dispatch(fetchPromos()),
+  fetchleaders: () => dispatch(fetchleaders()),
+  postContact: (contactId, firstname, lastname,contact,email,feedback) => dispatch(postContact(contactId, firstname, lastname,contact,email,feedback)),
 
-        return (
-          <div>
-             <Header data-testid="check-1" name="Restornate de Confusion" /> 
+});
 
-            <Switch>
-              <Route path="/home" component={HomePage} />
-              <Route exact path="/aboutus" component={()=> <About leader={this.state.leaders} />} />
-              <Route exact path="/menu" component={()=> <Menu dishes={this.state.dishes} />} />
-              <Route path="/Menu/:parameter" component={DishWithId} />
-              <Route exact path="/contactus" component={Contact} />
-              <Redirect to="/home" />
-            </Switch>
+class Main extends Component {
 
-            <Footer/>
-            {/* <Menu dishes={this.state.dishes} onclicking={(dishId) => this.onDishSelect(dishId)} />
-            <DishDetail dish={this.state.dishes.filter((dish) => dish.id === this.state.selectedDish)[0]} /> */}
-            
-          </div>
-        );
-    }
+  constructor(props) {
+    super(props);
   }
 
-export default Main;
+  componentDidMount() {
+    this.props.fetchDishes();
+    this.props.fetchComments();
+    this.props.fetchPromos();
+    this.props.fetchleaders();
+  }
+
+  render() {
+
+    const HomePage = () => {
+      return (
+        <Home
+          dish={this.props.dishes.dishes.filter((dish) => dish.featured)[0]}
+          dishesLoading={this.props.dishes.isLoading}
+          dishesErrMess={this.props.dishes.errMess}
+          promotion={this.props.promotions.promotions.filter((promo) => promo.featured)[0]}
+          promoLoading={this.props.promotions.isLoading}
+          promoErrMess={this.props.promotions.errMess}
+          leader={this.props.leaders.leaders.filter((leader) => leader.featured)[0]}
+          leaderLoading={this.props.leaders.isLoading}
+          leaderErrMess={this.props.leaders.errMess}
+        />
+      );
+    }
+    const DishWithId = ({ match }) => {
+      return (
+        <DishDetail dish={this.props.dishes.dishes.filter((dish) => dish.id === parseInt(match.params.parameter, 10))[0]}
+          isLoading={this.props.dishes.isLoading}
+          errMess={this.props.dishes.errMess}
+          comments={this.props.comments.comments.filter((comment) => comment.dishId === parseInt(match.params.parameter, 10))}
+          commentsErrMess={this.props.comments.errMess}
+          postComment={this.props.postComment}
+        />
+      );
+    }
+
+    return (
+      <div>
+        <Header data-testid="check-1" name="Restornate de Confusion" />
+        <TransitionGroup>
+          <CSSTransition key={this.props.location.key} classNames="page" timeout={300}>
+            <Switch>
+              <Route path="/home" component={HomePage} />
+              <Route exact path="/aboutus" component={() => <About leaders={this.props.leaders}   />} />
+              <Route exact path="/menu" component={() => <Menu dishes={this.props.dishes} />} />
+              <Route path="/Menu/:parameter" component={DishWithId} />
+              <Route exact path="/contactus" component={() => <Contact resetFeedbackForm={this.props.resetFeedbackForm}  postContact={this.props.postContact} />} />
+              <Redirect to="/home" />
+            </Switch>
+          </CSSTransition>
+        </TransitionGroup>
+
+        <Footer />
+        {/* <Menu dishes={this.state.dishes} onclicking={(dishId) => this.onDishSelect(dishId)} />
+            <DishDetail dish={this.state.dishes.filter((dish) => dish.id === this.state.selectedDish)[0]} /> */}
+
+      </div>
+    );
+  }
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Main));

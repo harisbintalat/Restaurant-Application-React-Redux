@@ -1,34 +1,60 @@
 import React from 'react';
 import { Breadcrumb, BreadcrumbItem, Card, CardBody, CardHeader, Media } from 'reactstrap';
 import { Link } from 'react-router-dom';
+import { Loading } from './LoadingComponent';
+import { Fade, Stagger } from 'react-animation-components';
+import { baseUrl } from '../shared/baseUrl';
 
-const RenderLeader = ({selectedLeader}) => {
-    return(
-            <div key={selectedLeader.id} className="col-12 mb-4 ">
-                <Media tag="li">
-                    <Media left middle>
-                        <Media object src={selectedLeader.image} alt={selectedLeader.name} />
+const RenderLeader = ({ selectedLeader }) => {
+
+    return (
+        <div key={selectedLeader.id} className="col-12 mb-4 ">
+            <Stagger in>
+                <Fade in>
+                    <Media tag="li">
+                        <Media left middle>
+                            <Media object src={baseUrl + selectedLeader.image} alt={selectedLeader.name} />
+                        </Media>
+                        <Media body className="ml-5">
+                            <Media heading>{selectedLeader.name}</Media>
+                            <h6>{selectedLeader.designation}</h6>
+                            <p className="d-none d-sm-block">{selectedLeader.description}</p>
+                        </Media>
                     </Media>
-                    <Media body className="ml-5">
-                        <Media heading>{selectedLeader.name}</Media>
-                        <h6>{selectedLeader.designation}</h6>
-                        <p className="d-none d-sm-block">{selectedLeader.description}</p>
-                    </Media>
-                </Media>
-            </div>  
+                </Fade>
+            </Stagger>
+        </div>
     );
+
 }
 function About(props) {
-
-    const leaders = props.leader.map((leader) => {
+    const leaders = props.leaders.leaders.map((leader) => {
+        if (props.leaders.isLoading) {
+            return (
+                <div className="container">
+                    <div className="row">
+                        <Loading />
+                    </div>
+                </div>
+            );
+        }
+        else if (props.leaders.errMess) {
+            return (
+                <div className="container">
+                    <div className="row">
+                        <h4>{props.leaders.errMess}</h4>
+                    </div>
+                </div>
+            );
+        }
         return (
             <div className="row">
-                 <RenderLeader selectedLeader={leader}  />
+                <RenderLeader selectedLeader={leader} />
             </div>
         );
     });
 
-    return(
+    return (
         <div className="container">
             <div className="row">
                 <Breadcrumb>
@@ -38,7 +64,7 @@ function About(props) {
                 <div className="col-12">
                     <h3>About Us</h3>
                     <hr />
-                </div>                
+                </div>
             </div>
             <div className="row row-content">
                 <div className="col-12 col-md-6">
@@ -70,8 +96,8 @@ function About(props) {
                                 <p className="mb-0">You better cut the pizza in four pieces because
                                     I'm not hungry enough to eat six.</p>
                                 <footer className="blockquote-footer">Yogi Berra,
-                                <cite title="Source Title">The Wit and Wisdom of Yogi Berra,
-                                    P. Pepe, Diversion Books, 2014</cite>
+                                    <cite title="Source Title">The Wit and Wisdom of Yogi Berra,
+                                        P. Pepe, Diversion Books, 2014</cite>
                                 </footer>
                             </blockquote>
                         </CardBody>
@@ -83,6 +109,7 @@ function About(props) {
                     <h2>Corporate Leadership</h2>
                 </div>
                 <div className="col-12">
+
                     <Media list>
                         {leaders}
                     </Media>

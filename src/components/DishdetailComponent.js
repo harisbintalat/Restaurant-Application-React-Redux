@@ -1,12 +1,17 @@
-import React from "react";
-import { Card, CardImg, CardImgOverlay,Breadcrumb,BreadcrumbItem, CardText, CardBody, CardTitle } from 'reactstrap';
+import React, {useState} from "react";
+import CommentForm from "./CommentFormComponent";
+import { Card, CardImg, CardImgOverlay, Breadcrumb, BreadcrumbItem, CardText, CardBody, CardTitle, Button } from 'reactstrap';
 import { Link } from "react-router-dom";
+import {Loading} from './LoadingComponent'
+import { baseUrl } from '../shared/baseUrl';
+import { FadeTransform, Fade, Stagger } from 'react-animation-components';
 
+function RenderCom({comments, postComment, dishId }) {
 
-function RenderCom({ comments }) {
     if (comments == null) {
         return (<div></div>)
     }
+    
     const cmnts = comments.map(comment => {
         return (
             <li key={comment.id}>
@@ -28,7 +33,7 @@ function RenderCom({ comments }) {
             <ul className='list-unstyled'>
                 {cmnts}
             </ul>
-
+            <CommentForm dishId={dishId} postComment={postComment}  />
         </div>
     )
 }
@@ -43,13 +48,19 @@ function RenderDish({ dish }) {
     else {
         return (
             <div className='col-12 col-md-5 m-1'>
+                 <FadeTransform
+                in
+                transformProps={{
+                    exitTransform: 'scale(0.5) translateY(-50%)'
+                }}>
                 <Card>
-                    <CardImg width="100%" src={dish.image} alt={dish.name} />
+                <CardImg top src={baseUrl + dish.image} alt={dish.name} />
                     <CardBody>
                         <CardTitle> {dish.name}</CardTitle>
                         <CardText> {dish.description} </CardText>
                     </CardBody>
                 </Card>
+                </FadeTransform>
             </div>
         );
     }
@@ -58,12 +69,37 @@ function RenderDish({ dish }) {
 
 const DishDetail = (props) => {
     const dish = props.dish;
-    if (dish == null) {
+
+    if(props.isLoading) {
+        return(
+            <div className="container">
+                <div className="row">
+                    <Loading />
+                </div>
+            </div>
+        );
+    }
+    else if(props.errMess) {
+        return(
+            <div className="container">
+                <div className="row">
+                    <h4>{props.errMess}</h4>
+                </div>
+            </div>
+        );
+
+    }
+
+    else if (dish == null) {
         return (<div></div>);
     }
 
     const dishItem = <RenderDish dish={props.dish} />
-    const dishComment = <RenderCom comments={props.comments} />
+    const dishComment = <RenderCom comments={props.comments}
+    postComment={props.postComment}
+    dishId = {props.dish.id}
+    />
+
     return (
         <div className="container">
             <div className="row">
